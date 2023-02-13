@@ -20,12 +20,16 @@ int main(int argc, char** argv) {
 	// we will try to send a message from rank zero that is just the rank number and we will ask
 	// the recieving process to print out that number
 	if (world_rank == 0) {
+		//data to send, amount of items, data type,  
+		//rank of receiver, message tag, communicaiton group(usually COMM_WORLD)
 		MPI_Send(&world_rank, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
 		MPI_Send(&world_rank, 1, MPI_INT, 2, 0, MPI_COMM_WORLD);
 		MPI_Send(&world_rank, 1, MPI_INT, 3, 0, MPI_COMM_WORLD);
 	}
 	else {
 		int recieved_data = 2000;
+		//received data, amount, data type, rank of who sent
+		//message tag, communication group, status of message(ignore for now)
 		MPI_Recv(&recieved_data, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 		std::cout << "rank: " << world_rank << " recieved data from rank: " << recieved_data
 			<< std::endl;
