@@ -3,10 +3,12 @@
 #include <iostream>
 #include <cstdlib>
 #include <mpi.h>
+
 /** messages for communicating tasks **/
 int COMPUTE_AVERAGE = 1;
 int SEND_AVERAGE = 2;
 int SHUTDOWN = 3;
+
 /** the world rank and size that will be useful in many functions **/
 int world_size;
 int world_rank;
@@ -16,19 +18,23 @@ void master(void) {
 	float total_average = 0;
 	// an average that we recieve from a node
 	float average = 0;
+
 	// ask all three nodes to compute an average
 	for (int i = 1; i < world_size; i++)
 		MPI_Send(&COMPUTE_AVERAGE, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
 	std::cout << "Master (0): told all slaves to compute" << std::endl;
+
 	// ask all three nodes to send their average to us
 	for (int i = 1; i < world_size; i++) {
 		MPI_Send(&SEND_AVERAGE, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
 		MPI_Recv(&average, 1, MPI_FLOAT, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 		total_average += average;
 	}
+
 	// take the average of averages and display the result
 	std::cout << "Master (0): average result from all slaves is: " << total_average /
 		(world_size - 1) << std::endl;
+
 	// tell all the nodes to shutdown
 	for (int i = 1; i < world_size; i++) {
 		MPI_Send(&SHUTDOWN, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
@@ -40,12 +46,14 @@ void slave(void) {
 	// the message type that we have recieved
 	int message_type = 0;
 	float average = 0;
+
 	// keep looping until we recieve a shutdown message
 	MPI_Recv(&message_type, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 	while (message_type != SHUTDOWN) {
 		if (message_type == COMPUTE_AVERAGE) {
 			std::cout << "Slave (" << world_rank << "): calculating average" <<
 				std::endl;
+
 			// get the average of 100 random numbers
 			srand(world_rank);
 			int sum = 0;
@@ -59,10 +67,14 @@ void slave(void) {
 			std::cout << "Slave (" << world_rank << "): calculated average" <<
 				std::endl;
 		}
+		// sends local average back to master
 		else if (message_type == SEND_AVERAGE) {
 			MPI_Send(&average, 1, MPI_FLOAT, 0, 0, MPI_COMM_WORLD);
 			std::cout << "Slave (" << world_rank << "): sent average" << std::endl;
-		} MPI_Recv(&message_type, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		} 
+
+		// check for next message (if shutdown, break loop)
+		MPI_Recv(&message_type, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 	}
 	std::cout << "Slave (" << world_rank << "): going for shutdown" << std::endl;
 }
