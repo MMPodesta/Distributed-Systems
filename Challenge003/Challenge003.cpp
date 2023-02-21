@@ -9,6 +9,7 @@ on awakening, the node will then synchronise with the others
 print “rank X synchronised” after synchronisation*/
 
 int main(int argc, char** argv) {
+	//DO APP 007 FIRST
 
 	std::cout << "test" << std::endl;
 
