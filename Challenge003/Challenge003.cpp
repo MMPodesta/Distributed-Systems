@@ -25,9 +25,11 @@ int main(int argc, char** argv) {
 	int sleep_time = rand() % 5;
 	std::cout << "rank " << world_rank << " sleeping " << sleep_time << std::endl;
 
+	// send to sleep
 	Sleep(sleep_time * 1000);
 	std::cout << "rank " << world_rank << " waking up and synchronizing" << std::endl;
 
+	// wake up and synchronise 
 	MPI_Barrier(MPI_COMM_WORLD);
 	std::cout << "rank " << world_rank << " synchronized" << std::endl;
 
